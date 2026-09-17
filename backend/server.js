@@ -1,5 +1,7 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
+const { GoogleGenAI } = require('@google/genai');
 require('dotenv').config();
 
 const app = express();
@@ -8,29 +10,37 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-// Simple endpoint to handle chat messages
-app.post('/api/chat', (req, res) => {
+// Initialize Gemini API (Ye automatically process.env.GEMINI_API_KEY utha lega)
+const ai = new GoogleGenAI();
+
+// Frontend static files serve karne ke liye
+app.use(express.static(path.join(__dirname, '../frontend')));
+
+// API Endpoint connecting to Gemini API
+app.post('/api/chat', async (req, res) => {
     const { message } = req.body;
     
     if (!message) {
         return res.status(400).json({ error: 'Message is required' });
     }
 
-    // Simulated AI response logic
-    setTimeout(() => {
-        let reply = "That's awesome! I'm here to help you with questions, coding, and brainstorming.";
-        const lowerMsg = message.toLowerCase();
+    try {
+        // Call Gemini 2.5 Flash model for fast responses
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: message,
+            config: {
+                systemInstruction: "You are Kewa AI, a helpful, friendly, and smart assistant embedded in a chatbot UI. Keep answers clear, concise, and helpful."
+            }
+        });
 
-        if (lowerMsg.includes('hello') || lowerMsg.includes('hi')) {
-            reply = "Hello! 👋 I'm your AI assistant. How can I help you today?";
-        } else if (lowerMsg.includes('who are you') || lowerMsg.includes('about yourself')) {
-            reply = "Of course! I'm an AI assistant designed to help you with questions, ideas, explanations, coding, learning and much more.";
-        } else if (lowerMsg.includes('what can you do')) {
-            reply = "I can help with answering questions, explaining complex topics, brainstorming ideas, writing code, and much more!";
-        }
-
+        const reply = response.text || "I couldn't generate a response right now.";
         res.json({ reply });
-    }, 1000);
+
+    } catch (error) {
+        console.error("Gemini API Error:", error);
+        res.status(500).json({ reply: "Oops! Something went wrong while connecting to the Gemini API." });
+    }
 });
 
 app.listen(PORT, () => {
