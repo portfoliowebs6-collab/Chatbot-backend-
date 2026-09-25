@@ -1,70 +1,176 @@
-const chatMessages = document.getElementById('chatMessages');
-const userInput = document.getElementById('userInput');
-const sendBtn = document.getElementById('sendBtn');
+const API_BASE_URL = "https://chatbot-backend-sf0z.onrender.com";
 
-// Helper to get current time format like "10:25 AM"
-function getCurrentTime() {
-    const now = new Date();
-    let hours = now.getHours();
-    let minutes = now.getMinutes();
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    hours = hours % 12;
-    hours = hours ? hours : 12; // the hour '0' should be '12'
-    minutes = minutes < 10 ? '0' + minutes : minutes;
-    return `${hours}:${minutes} ${ampm}`;
+const chatBox = document.getElementById("chatBox");
+const messageInput = document.getElementById("messageInput");
+const sendButton = document.getElementById("sendButton");
+
+
+/* =========================
+   ADD MESSAGE
+========================= */
+
+function addMessage(text, type) {
+
+    const message = document.createElement("div");
+
+    message.className =
+        type === "user"
+            ? "message user-message"
+            : "message ai-message";
+
+
+    if (type === "ai") {
+
+        message.innerHTML = `
+            <div class="avatar">K</div>
+
+            <div class="bubble">
+                <p>${escapeHTML(text)}</p>
+            </div>
+        `;
+
+    } else {
+
+        message.innerHTML = `
+            <div class="bubble">
+                <p>${escapeHTML(text)}</p>
+            </div>
+        `;
+    }
+
+
+    chatBox.appendChild(message);
+
+    scrollToBottom();
 }
 
-// Append message into chat screen
-function appendMessage(text, sender) {
-    const isUser = sender === 'user';
-    const messageDiv = document.createElement('div');
-    messageDiv.classList.add('message', isUser ? 'user-message' : 'bot-message');
 
-    messageDiv.innerHTML = `
-        <div class="msg-avatar"><i class="fa-solid ${isUser ? 'fa-user' : 'fa-robot'}"></i></div>
-        <div class="msg-content">
-            <p>${text.replace(/\n/g, '<br>')}</p>
-            <span class="timestamp">${getCurrentTime()}</span>
-        </div>
-    `;
+/* =========================
+   ESCAPE HTML
+========================= */
 
-    chatMessages.appendChild(messageDiv);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
+function escapeHTML(text) {
+
+    const div = document.createElement("div");
+
+    div.textContent = text;
+
+    return div.innerHTML;
 }
 
-// Handle sending message logic
-async function handleSendMessage() {
-    const text = userInput.value.trim();
-    if (!text) return;
 
-    // Display User Message
-    appendMessage(text, 'user');
-    userInput.value = '';
+/* =========================
+   SCROLL
+========================= */
+
+function scrollToBottom() {
+
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+
+/* =========================
+   SEND MESSAGE
+========================= */
+
+async function sendMessage() {
+
+    const message = messageInput.value.trim();
+
+    if (!message) return;
+
+
+    // Show user message
+    addMessage(message, "user");
+
+
+    // Clear input
+    messageInput.value = "";
+
+
+    // Disable button
+    sendButton.disabled = true;
+
 
     try {
-        // Fetch response from backend server
-        const response = await fetch('https://chatbot-backend-m5xd.onrender.com/api/chat', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: text })
-        });
+
+        const response = await fetch(
+            `${API_BASE_URL}/api/chat`,
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+                    message: message
+                })
+            }
+        );
+
 
         const data = await response.json();
-        if (data.reply) {
-            appendMessage(data.reply, 'bot');
-        } else {
-            appendMessage("Sorry, something went wrong.", 'bot');
+
+
+        if (!response.ok || !data.success) {
+
+            throw new Error(
+                data.error || "AI response failed"
+            );
         }
+
+
+        // Show AI reply
+        addMessage(data.reply, "ai");
+
+
     } catch (error) {
-        console.error('Error connecting to backend:', error);
-        appendMessage("Unable to connect to the backend server. Make sure it's running.", 'bot');
+
+        console.error("Chat Error:", error);
+
+        addMessage(
+            "Sorry, I couldn't connect to the AI server.",
+            "ai"
+        );
+
+    } finally {
+
+        sendButton.disabled = false;
+
+        messageInput.focus();
     }
 }
 
-// Event Listeners
-sendBtn.addEventListener('click', handleSendMessage);
-userInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-        handleSendMessage();
+
+/* =========================
+   BUTTON
+========================= */
+
+sendButton.addEventListener(
+    "click",
+    sendMessage
+);
+
+
+/* =========================
+   ENTER KEY
+========================= */
+
+messageInput.addEventListener(
+    "keydown",
+    function (event) {
+
+        if (event.key === "Enter") {
+
+            event.preventDefault();
+
+            sendMessage();
+        }
     }
-});
+);
+
+
+/* Focus input */
+
+messageInput.focus();

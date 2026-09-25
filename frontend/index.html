@@ -1,52 +1,82 @@
 <!DOCTYPE html>
-<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kewa AI Assistant</title>
+
+    <title>Kewa AI</title>
+
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
+
 <body>
-    <div class="app-container">
-        <!-- Main Chat Area (Sidebar Removed) -->
-        <main class="chat-main">
-            <!-- Chat Header -->
+
+    <div class="app">
+
+        <!-- Background -->
+        <div class="background"></div>
+
+        <!-- Main Chat -->
+        <main class="chat-container">
+
+            <!-- Header -->
             <header class="chat-header">
-                <div class="header-user">
-                    <div class="bot-avatar"><i class="fa-solid fa-robot"></i></div>
+                <div class="brand">
+                    <div class="logo">K</div>
+
                     <div>
-                        <h3>Kewa AI Assistant</h3>
-                        <span class="status-indicator"><span class="dot"></span> Online</span>
+                        <h1>Kewa AI</h1>
+                        <p>AI Assistant</p>
                     </div>
                 </div>
-                <div class="header-actions">
-                    <i class="fa-regular fa-sun"></i>
+
+                <div class="status">
+                    <span></span>
+                    Online
                 </div>
             </header>
 
-            <!-- Chat Messages Box -->
-            <div class="chat-messages" id="chatMessages">
-                <div class="message bot-message">
-                    <div class="msg-avatar"><i class="fa-solid fa-robot"></i></div>
-                    <div class="msg-content">
-                        <p>Hello! 👋<br>I'm your AI assistant. How can I help you today?</p>
-                        <span class="timestamp">10:24 AM</span>
+
+            <!-- Messages -->
+            <section class="chat-box" id="chatBox">
+
+                <!-- Welcome message -->
+                <div class="message ai-message">
+                    <div class="avatar">K</div>
+
+                    <div class="bubble">
+                        <p>
+                            Hey! 👋 I'm Kewa AI.<br>
+                            How can I help you today?
+                        </p>
                     </div>
                 </div>
+
+            </section>
+
+
+            <!-- Input -->
+            <div class="input-area">
+
+                <input
+                    type="text"
+                    id="messageInput"
+                    placeholder="Message Kewa AI..."
+                    autocomplete="off"
+                >
+
+                <button id="sendButton" type="button">
+                    <span>➤</span>
+                </button>
+
             </div>
 
-            <!-- Chat Input Area (Clean: Only Input & Send Button) -->
-            <div class="chat-input-area">
-                <div class="input-wrapper">
-                    <input type="text" id="userInput" placeholder="Type your message...">
-                    <button class="send-btn" id="sendBtn"><i class="fa-solid fa-paper-plane"></i></button>
-                </div>
-            </div>
         </main>
+
     </div>
 
+
     <script src="script.js"></script>
+
 </body>
 </html>
